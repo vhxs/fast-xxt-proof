@@ -1,8 +1,9 @@
 from sympy import symbols, MatrixSymbol, Transpose, expand, ZeroMatrix
 
 def main():
-    n, m = symbols('n m', integer=True)
 
+    # Define blocks of the matrix
+    n, m = symbols('n m', integer=True)
     Xi = {i: MatrixSymbol(f'X{i}', n, m) for i in range(1, 17)}
     X_blocks =[
         [Xi[1],  Xi[2],  Xi[3],  Xi[4]],
@@ -11,7 +12,7 @@ def main():
         [Xi[13], Xi[14], Xi[15], Xi[16]]
     ]
 
-    # Build the expression
+    # Build the expressions enumerated on page 2 of https://arxiv.org/pdf/2505.09814
     m1 = (-Xi[2] + Xi[3] - Xi[4] + Xi[8]) * Transpose(Xi[8] + Xi[11])
     m2 = (Xi[1] - Xi[5] - Xi[6] + Xi[7]) * Transpose(Xi[15] + Xi[5])
     m3 = (-Xi[2] + Xi[12]) * Transpose(-Xi[10] + Xi[16] + Xi[12])
@@ -48,6 +49,7 @@ def main():
     s7 = Xi[15] * Transpose(Xi[15])
     s8 = Xi[16] * Transpose(Xi[16])
 
+    # These are the block matrices in the lower triangle of XX^T
     C11 = s1 + s2 + s3 + s4
     C12 = m2 - m5 - m7 + m11 + m12 + m13 + m19
     C13 = m1 + m3 + m12 + m15 + m16 + m17 + m21 - m24
@@ -59,6 +61,7 @@ def main():
     C34 = m3 + m5 + m7 + m8 + m17 + m18 + m25
     C44 = s5 + s6 + s7 + s8
 
+    # Since XX^T is symmetric, we can just use the transpose to compute the remaining blocks
     C21 = Transpose(C12)
     C31 = Transpose(C13)
     C32 = Transpose(C23)
@@ -66,6 +69,7 @@ def main():
     C42 = Transpose(C24)
     C43 = Transpose(C34)
 
+    # All blocks in C
     C_blocks = [
         [C11, C12, C13, C14],
         [C21, C22, C23, C24],
@@ -73,6 +77,8 @@ def main():
         [C41, C42, C43, C44],
     ]
 
+    # Verify correctness by comparing the blocks of C to the blocks of XX^T one at a time.
+    # At least one assertation error would be raised if C and XX^T weren't the same. But they're the same.
     for i in range(4):
         for j in range(4):
             row_i = X_blocks[i]
